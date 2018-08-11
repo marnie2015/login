@@ -1,13 +1,17 @@
+require 'digest/sha1'
+
 Types::QueryType = GraphQL::ObjectType.define do
   name "Query"
-  # Add root-level fields here.
-  # They will be entry points for queries on your schema.
 
-  # TODO: remove me
-  field :allUsers, types[Types::UserType] do
-    # description "An example field added by the generator"
+  field :signIn, types[Types::UserType] do
+    argument :email_address, !types.String
+    argument :password, !types.String
     resolve ->(obj, args, ctx) {
-      User.all.first(10)
+      User.where(email_address: args[:email_address], password: encrypt_pass(args[:password]))
     }
+
+    def encrypt_pass(val)
+      Digest::MD5.hexdigest(val)
+    end
   end
 end
